@@ -3,9 +3,18 @@ const https = require('https');
 const url = require('url');
 
 const PORT = process.env.PORT || 3000;
+const SELF_URL = 'https://kiwiplus-proxy.onrender.com';
+
+// Keep-alive - פינג לעצמו כל 4 דקות
+setInterval(() => {
+    https.get(SELF_URL, (res) => {
+        console.log('Keep-alive ping:', res.statusCode);
+    }).on('error', (e) => {
+        console.log('Keep-alive error:', e.message);
+    });
+}, 4 * 60 * 1000);
 
 http.createServer((req, res) => {
-    // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
@@ -16,7 +25,7 @@ http.createServer((req, res) => {
         return;
     }
 
-    const targetUrl = req.url.slice(1); // הסר את ה-/
+    const targetUrl = req.url.slice(1);
     if (!targetUrl || !targetUrl.startsWith('http')) {
         res.writeHead(200);
         res.end('KiwiPlus Proxy OK');
